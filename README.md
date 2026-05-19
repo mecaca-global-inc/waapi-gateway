@@ -1,6 +1,6 @@
 # WAAPI Gateway
 
-[![CI](https://github.com/techsupport-mecaca/waapi-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/techsupport-mecaca/waapi-gateway/actions/workflows/ci.yml)
+[![CI](https://github.com/mecaca-global-inc/waapi-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/mecaca-global-inc/waapi-gateway/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/go-1.26%2B-00ADD8)](https://go.dev/)
 [![Node](https://img.shields.io/badge/node-22%2B-339933)](https://nodejs.org/)
@@ -25,7 +25,7 @@ Self-hosted **WhatsApp HTTP API + Dashboard** — single Go binary, Next.js cont
 ## Quick start (Docker)
 
 ```bash
-git clone https://github.com/techsupport-mecaca/waapi-gateway
+git clone https://github.com/mecaca-global-inc/waapi-gateway
 cd waapi-gateway
 cp .env.example .env
 # Edit ADMIN_PASS in .env — gateway refuses to boot with weak defaults
