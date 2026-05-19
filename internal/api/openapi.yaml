@@ -25,6 +25,7 @@ tags:
   - name: Pairing
   - name: Messaging
   - name: Read
+  - name: Groups
   - name: Webhooks
   - name: API keys
   - name: Health
@@ -465,7 +466,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/SessionInPath"
     get:
-      tags: [Read]
+      tags: [Groups]
       summary: List joined groups
       responses:
         "200":
@@ -481,6 +482,316 @@ paths:
                     name:    { type: string }
                     topic:   { type: string }
                     members: { type: integer }
+    post:
+      tags: [Groups]
+      summary: Create a new group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, participants]
+              properties:
+                name:         { type: string, example: "Project Falcon" }
+                participants: { type: array, items: { type: string }, example: ["6281234567890", "60123456789"] }
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupInfo" }
+
+  /api/{session}/groups/join:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+    post:
+      tags: [Groups]
+      summary: Join a group via invite link or code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [link]
+              properties:
+                link: { type: string, example: "https://chat.whatsapp.com/ABCD1234EFGH5678" }
+      responses:
+        "200":
+          description: joined
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jid: { type: string }
+
+  /api/{session}/groups/{gid}:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    get:
+      tags: [Groups]
+      summary: Get full group info (members, settings)
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupInfo" }
+
+  /api/{session}/groups/{gid}/leave:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    post:
+      tags: [Groups]
+      summary: Leave the group
+      responses:
+        "200": { description: ok }
+
+  /api/{session}/groups/{gid}/participants/add:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    post:
+      tags: [Groups]
+      summary: Add participants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ParticipantsBody" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/ParticipantResult" } }
+
+  /api/{session}/groups/{gid}/participants/remove:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    post:
+      tags: [Groups]
+      summary: Remove participants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ParticipantsBody" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/ParticipantResult" } }
+
+  /api/{session}/groups/{gid}/participants/promote:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    post:
+      tags: [Groups]
+      summary: Promote participants to admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ParticipantsBody" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/ParticipantResult" } }
+
+  /api/{session}/groups/{gid}/participants/demote:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    post:
+      tags: [Groups]
+      summary: Demote admin to participant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ParticipantsBody" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/ParticipantResult" } }
+
+  /api/{session}/groups/{gid}/name:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    put:
+      tags: [Groups]
+      summary: Rename group (max 25 chars)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, example: "Renamed Group" }
+      responses:
+        "200": { description: ok }
+
+  /api/{session}/groups/{gid}/topic:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    put:
+      tags: [Groups]
+      summary: Set group topic / description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [topic]
+              properties:
+                topic: { type: string }
+      responses:
+        "200": { description: ok }
+
+  /api/{session}/groups/{gid}/locked:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    put:
+      tags: [Groups]
+      summary: Restrict group info editing to admins
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value: { type: boolean }
+      responses:
+        "200": { description: ok }
+
+  /api/{session}/groups/{gid}/announce:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    put:
+      tags: [Groups]
+      summary: Announce-only mode — only admins can send messages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value: { type: boolean }
+      responses:
+        "200": { description: ok }
+
+  /api/{session}/groups/{gid}/photo:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    put:
+      tags: [Groups]
+      summary: Set group photo (JSON+URL or multipart file)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url: { type: string, example: "https://example.com/group.jpg" }
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: { type: string, format: binary }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  picture_id: { type: string }
+
+  /api/{session}/groups/{gid}/disappearing:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    put:
+      tags: [Groups]
+      summary: Set disappearing-messages timer (seconds; 0 to disable)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [seconds]
+              properties:
+                seconds:
+                  type: integer
+                  description: "Allowed values: 0, 86400 (24h), 604800 (7d), 7776000 (90d)"
+                  example: 86400
+      responses:
+        "200": { description: ok }
+
+  /api/{session}/groups/{gid}/invite-link:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    get:
+      tags: [Groups]
+      summary: Get the current invite link
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  link: { type: string, example: "https://chat.whatsapp.com/ABCD1234EFGH5678" }
+                  code: { type: string }
+
+  /api/{session}/groups/{gid}/invite-link/revoke:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+      - $ref: "#/components/parameters/GroupID"
+    post:
+      tags: [Groups]
+      summary: Revoke and regenerate the invite link
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  link: { type: string }
+                  code: { type: string }
 
   /api/{session}/webhooks:
     parameters:
@@ -602,6 +913,13 @@ components:
       required: true
       schema: { type: string }
       example: default
+    GroupID:
+      in: path
+      name: gid
+      required: true
+      description: "Group JID (e.g. 1234567890-1700000000@g.us) or bare group ID."
+      schema: { type: string }
+      example: "1234567890-1700000000@g.us"
 
   schemas:
     Session:
@@ -674,6 +992,40 @@ components:
         mimetype:   { type: string }
         filename:   { type: string }
         expiration: { type: integer }
+
+    GroupInfo:
+      type: object
+      properties:
+        jid:        { type: string, example: "1234567890-1700000000@g.us" }
+        name:       { type: string }
+        topic:      { type: string }
+        locked:     { type: boolean }
+        announce:   { type: boolean }
+        owner:      { type: string }
+        created_at: { type: integer }
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              jid:          { type: string }
+              is_admin:     { type: boolean }
+              is_superadmin: { type: boolean }
+
+    ParticipantsBody:
+      type: object
+      required: [participants]
+      properties:
+        participants:
+          type: array
+          items: { type: string }
+          example: ["6281234567890", "60123456789@s.whatsapp.net"]
+
+    ParticipantResult:
+      type: object
+      properties:
+        jid:   { type: string }
+        error: { type: integer, description: "WhatsApp error code (0 = success)" }
 
     WebhookEnvelope:
       type: object

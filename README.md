@@ -16,6 +16,7 @@ Self-hosted **WhatsApp HTTP API + Dashboard** — single Go binary, Next.js cont
 - 💬 **Send** text, image, video, voice (PTT), file, location, contact
 - 👀 **Receipts & presence** — mark-as-read, typing indicators
 - ⏳ **Disappearing-messages aware** — auto-inherits the chat's ephemeral timer so replies don't trigger the "sender may be on an old version" warning
+- 👥 **Group admin** — create, add/remove/promote/demote, rename, topic, lock, announce-only, photo, invite link, join-by-link, disappearing timer
 - 📥 **Webhook delivery** with HMAC-SHA256 signing, retries, event filtering
 - 🔴 **Live WebSocket stream** for the dashboard
 - 🎨 **Next.js 16 dashboard** — sessions, send playground, webhooks, API keys, embedded Swagger UI
@@ -77,6 +78,7 @@ Highlights:
 | Login    | `GET /api/{session}/auth/qr`, `GET /api/{session}/auth/qr.png`, `POST /api/{session}/auth/request-code` |
 | Send     | `POST /api/sendText\|sendImage\|sendVideo\|sendVoice\|sendFile\|sendLocation\|sendContact` |
 | Read     | `GET /api/{session}/{me\|contacts\|chats\|groups}` |
+| Groups   | `POST /api/{session}/groups` (create), `POST /api/{session}/groups/join`, `GET /api/{session}/groups/{gid}`, `POST /api/{session}/groups/{gid}/leave`, `POST /api/{session}/groups/{gid}/participants/{add\|remove\|promote\|demote}`, `PUT /api/{session}/groups/{gid}/{name\|topic\|locked\|announce\|photo\|disappearing}`, `GET /api/{session}/groups/{gid}/invite-link`, `POST /api/{session}/groups/{gid}/invite-link/revoke` |
 | Webhooks | `GET/POST /api/{session}/webhooks`, `DELETE /api/webhooks/{id}` |
 | Keys     | `GET/POST /api/keys`, `DELETE /api/keys/{id}` |
 | Stream   | `GET /ws?key=...` |

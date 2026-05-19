@@ -99,6 +99,24 @@ func (s *Server) routes() {
 	api.Get("/:session/chats", s.getChats)
 	api.Get("/:session/groups", s.getGroups)
 
+	// Group admin
+	api.Post("/:session/groups", s.createGroup)
+	api.Post("/:session/groups/join", s.joinGroup)
+	api.Get("/:session/groups/:gid", s.getGroupInfo)
+	api.Post("/:session/groups/:gid/leave", s.leaveGroup)
+	api.Post("/:session/groups/:gid/participants/add", s.addParticipants)
+	api.Post("/:session/groups/:gid/participants/remove", s.removeParticipants)
+	api.Post("/:session/groups/:gid/participants/promote", s.promoteParticipants)
+	api.Post("/:session/groups/:gid/participants/demote", s.demoteParticipants)
+	api.Put("/:session/groups/:gid/name", s.setGroupName)
+	api.Put("/:session/groups/:gid/topic", s.setGroupTopic)
+	api.Put("/:session/groups/:gid/locked", s.setGroupLocked)
+	api.Put("/:session/groups/:gid/announce", s.setGroupAnnounce)
+	api.Put("/:session/groups/:gid/photo", s.setGroupPhoto)
+	api.Put("/:session/groups/:gid/disappearing", s.setGroupDisappearing)
+	api.Get("/:session/groups/:gid/invite-link", s.getInviteLink)
+	api.Post("/:session/groups/:gid/invite-link/revoke", s.revokeInviteLink)
+
 	// Webhooks
 	api.Get("/:session/webhooks", s.listWebhooks)
 	api.Post("/:session/webhooks", s.addWebhook)
