@@ -1,0 +1,32 @@
+# Deploy this on container PaaS (xCloud, Railway, Render, Fly, etc.).
+# Gateway only — dashboard ships separately on Vercel.
+# Required env vars: ADMIN_USER, ADMIN_PASS (strong; see SECURITY.md)
+services:
+  gateway:
+    build: .
+    image: waapi-gateway:latest
+    container_name: waapi-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      HTTP_ADDR: ":3000"
+      DB_DIALECT: sqlite3
+      DB_URI: "file:/app/storages/gateway.db?_foreign_keys=on"
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASS: ${ADMIN_PASS:?ADMIN_PASS is required and must not be admin/changeme/password/empty}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      DEVICE_NAME: ${DEVICE_NAME:-WAAPI Gateway}
+    volumes:
+      - gateway_data:/app/storages
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  gateway_data:

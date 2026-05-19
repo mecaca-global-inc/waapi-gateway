@@ -37,6 +37,30 @@ docker compose up -d --build
 - Gateway API: <http://localhost:3000>
 - Swagger UI: <http://localhost:3001/docs> (auth-gated)
 
+## Deploy to a container PaaS (Railway / Render / Fly / xCloud / Coolify)
+
+The gateway needs a long-running process and a persistent disk — **Vercel is not a good fit**. Use Vercel for the dashboard / landing only.
+
+Two compose files ship in this repo:
+
+| File | Use when |
+|---|---|
+| `docker-compose.yml`       | local dev (gateway **and** dashboard, two ports) |
+| `docker-compose.cloud.yml` | cloud deploy (gateway only, one port, env-var driven) |
+
+For one-click "Deploy from Git" flows:
+
+1. Point the platform at this repository, branch `main`.
+2. Set the compose file to **`docker-compose.cloud.yml`**.
+3. Primary service port: **`3000`** (gateway).
+4. Required environment variables:
+   - `ADMIN_USER` (default `admin`)
+   - `ADMIN_PASS` — must be strong (gateway refuses to boot on weak defaults)
+   - optional: `CORS_ORIGINS`, `LOG_FORMAT=json`, `DEVICE_NAME=YourBrand`
+5. Make sure the platform mounts the `gateway_data` volume on `/app/storages` so device sessions survive restarts.
+6. Deploy. Verify: `GET /healthz` returns `{"ok":true}`.
+7. Host the dashboard separately on **Vercel** with `NEXT_PUBLIC_GATEWAY_URL=https://<your-public-gateway>`.
+
 ## Local development
 
 ```bash

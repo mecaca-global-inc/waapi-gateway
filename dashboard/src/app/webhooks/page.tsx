@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import useSWR from "swr";
 import Shell from "@/components/Shell";
+import EventPicker from "@/components/EventPicker";
 import { api, fetcher } from "@/lib/api";
 import type { Session, Webhook } from "@/lib/types";
 
@@ -17,21 +18,18 @@ export default function WebhooksPage() {
 
   const [url, setUrl] = useState("");
   const [secret, setSecret] = useState("");
-  const [events, setEvents] = useState("message,message.ack,session.status");
+  const [events, setEvents] = useState<string[]>(["message", "message.ack", "session.status"]);
 
   async function add(e: FormEvent) {
     e.preventDefault();
     if (!session || !url) return;
     await api(`/api/${session}/webhooks`, {
       method: "POST",
-      json: {
-        url,
-        secret,
-        events: events.split(",").map((s) => s.trim()).filter(Boolean),
-      },
+      json: { url, secret, events },
     });
     setUrl("");
     setSecret("");
+    setEvents([]);
     mutate();
   }
 
@@ -59,30 +57,29 @@ export default function WebhooksPage() {
         </select>
       </div>
 
-      <form
-        onSubmit={add}
-        className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-2 items-end"
-      >
-        <input
-          className="px-3 py-2 rounded border border-zinc-300 dark:border-zinc-700 bg-transparent md:col-span-2"
-          placeholder="https://your.endpoint/hook"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-        />
-        <input
-          className="px-3 py-2 rounded border border-zinc-300 dark:border-zinc-700 bg-transparent"
-          placeholder="hmac secret (optional)"
-          value={secret}
-          onChange={(e) => setSecret(e.target.value)}
-        />
-        <input
-          className="px-3 py-2 rounded border border-zinc-300 dark:border-zinc-700 bg-transparent md:col-span-3"
-          placeholder="events (comma-separated, blank = all)"
-          value={events}
-          onChange={(e) => setEvents(e.target.value)}
-        />
+      <form onSubmit={add} className="mb-6 space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <input
+            className="px-3 py-2 rounded border border-zinc-300 dark:border-zinc-700 bg-transparent md:col-span-2"
+            placeholder="https://your.endpoint/hook"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
+          <input
+            className="px-3 py-2 rounded border border-zinc-300 dark:border-zinc-700 bg-transparent"
+            placeholder="hmac secret (optional)"
+            value={secret}
+            onChange={(e) => setSecret(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-zinc-500 mb-1">
+            Events <span className="text-zinc-400">(empty = all)</span>
+          </label>
+          <EventPicker value={events} onChange={setEvents} />
+        </div>
         <button className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-2 rounded">
-          Add
+          Add webhook
         </button>
       </form>
 
@@ -100,7 +97,22 @@ export default function WebhooksPage() {
             {(hooks ?? []).map((h) => (
               <tr key={h.id} className="border-t border-zinc-200 dark:border-zinc-800">
                 <td className="px-3 py-2 break-all">{h.url}</td>
-                <td className="px-3 py-2 text-zinc-500">{(h.events ?? []).join(", ") || "(all)"}</td>
+                <td className="px-3 py-2">
+                  {(h.events?.length ?? 0) === 0 ? (
+                    <span className="text-xs text-zinc-500 italic">all events</span>
+                  ) : (
+                    <div className="flex flex-wrap gap-1">
+                      {(h.events ?? []).map((ev) => (
+                        <span
+                          key={ev}
+                          className="inline-block px-2 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-[11px] font-mono"
+                        >
+                          {ev}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </td>
                 <td className="px-3 py-2">{h.enabled ? "yes" : "no"}</td>
                 <td className="px-3 py-2 text-right">
                   <button
