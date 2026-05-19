@@ -37,6 +37,12 @@ docker compose up -d --build
 - Gateway API: <http://localhost:3000>
 - Swagger UI: <http://localhost:3001/docs> (auth-gated)
 
+## Deploy guides
+
+Step-by-step instructions for specific platforms:
+
+- [Zeabur](docs/DEPLOY-ZEABUR.md) — single-binary, recommended for individuals + small teams
+
 ## Deploy to a container PaaS (Railway / Render / Fly / xCloud / Coolify)
 
 The gateway needs a long-running process and a persistent disk — **Vercel is not a good fit**. Use Vercel for the dashboard / landing only.
