@@ -1,0 +1,27 @@
+# Go
+/bin/
+/waapi-gateway
+/whatsapp-gateway
+*.test
+*.out
+coverage.out
+
+# Storage
+/storages/
+*.db
+*.db-journal
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Node / Next
+node_modules/
+.next/
+dist/
+
+# Editor
+.DS_Store
+.idea/
+.vscode/

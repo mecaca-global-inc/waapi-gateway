@@ -1,0 +1,43 @@
+services:
+  gateway:
+    build: .
+    image: waapi-gateway:latest
+    container_name: wa-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file: .env
+    volumes:
+      - gateway_data:/app/storages
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  dashboard:
+    build: ./dashboard
+    image: waapi-gateway-dashboard:latest
+    container_name: wa-dashboard
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NEXT_PUBLIC_GATEWAY_URL: http://localhost:3000
+    depends_on:
+      - gateway
+
+  # Optional Postgres backend
+  # postgres:
+  #   image: postgres:16-alpine
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: gateway
+  #     POSTGRES_PASSWORD: gateway
+  #     POSTGRES_DB: gateway
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  gateway_data:
+  # postgres_data:

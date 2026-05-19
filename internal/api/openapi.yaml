@@ -1,0 +1,689 @@
+openapi: 3.1.0
+info:
+  title: WhatsApp Gateway API
+  version: "1.0.0"
+  description: |
+    Self-hosted WhatsApp HTTP API built on tulir/whatsmeow.
+
+    **Auth:** every `/api/*` endpoint except `/api/login` requires `Authorization: Bearer <key>` (or `X-Api-Key: <key>`). Get a key via `POST /api/login`.
+
+    **Session ID** is the name you created (e.g. `default`). Pass it either in the path
+    (`/api/{session}/...`) or as the `session` field in JSON bodies of send-message calls.
+
+    **chat_id** accepts either a bare E.164 phone number (`6281234567890`) or a full JID
+    (`6281234567890@s.whatsapp.net` for personal, `1234567890-1700000000@g.us` for groups).
+servers:
+  - url: http://localhost:3000
+    description: Local
+security:
+  - BearerAuth: []
+  - ApiKey: []
+
+tags:
+  - name: Auth
+  - name: Sessions
+  - name: Pairing
+  - name: Messaging
+  - name: Read
+  - name: Webhooks
+  - name: API keys
+  - name: Health
+
+paths:
+  /healthz:
+    get:
+      tags: [Health]
+      security: []
+      summary: Liveness probe
+      responses:
+        "200": { description: ok }
+
+  /readyz:
+    get:
+      tags: [Health]
+      security: []
+      summary: Readiness probe
+      responses:
+        "200": { description: ok }
+
+  /api/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Exchange admin credentials for an API key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string, example: admin }
+                password: { type: string, example: admin }
+      responses:
+        "200":
+          description: API key issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key: { type: string, example: "8604c43f-d6b3-4305-b77f-8888d519ab07" }
+
+  /api/sessions:
+    get:
+      tags: [Sessions]
+      summary: List sessions
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Session" }
+    post:
+      tags: [Sessions]
+      summary: Create a new session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, example: default }
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "409": { description: already exists }
+
+  /api/sessions/{name}:
+    parameters:
+      - $ref: "#/components/parameters/SessionName"
+    get:
+      tags: [Sessions]
+      summary: Get a session
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+    delete:
+      tags: [Sessions]
+      summary: Delete a session (also logs out)
+      responses:
+        "200": { description: ok }
+
+  /api/sessions/{name}/start:
+    parameters:
+      - $ref: "#/components/parameters/SessionName"
+    post:
+      tags: [Sessions]
+      summary: Connect the session (will surface a QR if not paired)
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+
+  /api/sessions/{name}/stop:
+    parameters:
+      - $ref: "#/components/parameters/SessionName"
+    post:
+      tags: [Sessions]
+      summary: Disconnect (credentials kept)
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+
+  /api/sessions/{name}/logout:
+    parameters:
+      - $ref: "#/components/parameters/SessionName"
+    post:
+      tags: [Sessions]
+      summary: Wipe device credentials (forces re-pair)
+      responses:
+        "200": { description: ok }
+
+  /api/{session}/auth/qr:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+    get:
+      tags: [Pairing]
+      summary: Get the latest QR string (JSON)
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  code:   { type: string, description: "Empty if no QR pending" }
+
+  /api/{session}/auth/qr.png:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+    get:
+      tags: [Pairing]
+      summary: Render the latest QR as PNG
+      responses:
+        "200":
+          description: ok
+          content:
+            image/png:
+              schema: { type: string, format: binary }
+        "404": { description: no QR available }
+
+  /api/{session}/auth/request-code:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+    post:
+      tags: [Pairing]
+      summary: Get an 8-digit pairing code by phone number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string, example: "6281234567890", description: "E.164 without +" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: string, example: "ABCD-1234" }
+
+  /api/sendText:
+    post:
+      tags: [Messaging]
+      summary: Send a text message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session, chat_id, text]
+              properties:
+                session: { type: string, example: default }
+                chat_id: { type: string, example: "6281234567890", description: "phone or JID" }
+                text:    { type: string, example: "Hello from gateway" }
+                expiration:
+                  type: integer
+                  description: "Disappearing-messages timer in seconds. Omit to inherit the chat's current setting (auto-detected from incoming messages). Pass -1 to force a non-ephemeral message."
+                  example: 86400
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SendResult" }
+
+  /api/sendImage:
+    post:
+      tags: [Messaging]
+      summary: Send an image (JSON+URL or multipart)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MediaJSON" }
+          multipart/form-data:
+            schema: { $ref: "#/components/schemas/MediaMultipart" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SendResult" }
+
+  /api/sendVideo:
+    post:
+      tags: [Messaging]
+      summary: Send a video
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MediaJSON" }
+          multipart/form-data:
+            schema: { $ref: "#/components/schemas/MediaMultipart" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SendResult" }
+
+  /api/sendVoice:
+    post:
+      tags: [Messaging]
+      summary: Send a voice note (PTT, ogg/opus recommended)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MediaJSON" }
+          multipart/form-data:
+            schema: { $ref: "#/components/schemas/MediaMultipart" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SendResult" }
+
+  /api/sendFile:
+    post:
+      tags: [Messaging]
+      summary: Send a document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/MediaJSON"
+                - type: object
+                  properties:
+                    filename: { type: string, example: report.pdf }
+          multipart/form-data:
+            schema: { $ref: "#/components/schemas/MediaMultipart" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SendResult" }
+
+  /api/sendLocation:
+    post:
+      tags: [Messaging]
+      summary: Send a location pin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session, chat_id, latitude, longitude]
+              properties:
+                session:   { type: string, example: default }
+                chat_id:   { type: string, example: "6281234567890" }
+                latitude:  { type: number, example: -6.2 }
+                longitude: { type: number, example: 106.816 }
+                name:      { type: string, example: "Monas" }
+                address:   { type: string, example: "Jakarta" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SendResult" }
+
+  /api/sendContact:
+    post:
+      tags: [Messaging]
+      summary: Send a contact card (vCard)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session, chat_id, vcard]
+              properties:
+                session:      { type: string, example: default }
+                chat_id:      { type: string, example: "6281234567890" }
+                display_name: { type: string, example: "John Doe" }
+                vcard:        { type: string, example: "BEGIN:VCARD\nVERSION:3.0\nFN:John Doe\nTEL;type=CELL:+6281234567890\nEND:VCARD" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SendResult" }
+
+  /api/sendSeen:
+    post:
+      tags: [Messaging]
+      summary: Mark messages as read (blue ticks)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session, chat_id, message_ids]
+              properties:
+                session:     { type: string, example: default }
+                chat_id:     { type: string, example: "6281234567890" }
+                message_ids: { type: array, items: { type: string }, example: ["3EB0AAA111"] }
+                sender:      { type: string, description: "Optional, only needed for group reads", example: "6281234567890@s.whatsapp.net" }
+      responses:
+        "200": { description: ok }
+
+  /api/startTyping:
+    post:
+      tags: [Messaging]
+      summary: Show "typing..." indicator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session, chat_id]
+              properties:
+                session: { type: string }
+                chat_id: { type: string }
+      responses:
+        "200": { description: ok }
+
+  /api/stopTyping:
+    post:
+      tags: [Messaging]
+      summary: Clear the typing indicator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session, chat_id]
+              properties:
+                session: { type: string }
+                chat_id: { type: string }
+      responses:
+        "200": { description: ok }
+
+  /api/{session}/me:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+    get:
+      tags: [Read]
+      summary: Current logged-in account info
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logged_in: { type: boolean }
+                  jid:       { type: string }
+                  push_name: { type: string }
+                  platform:  { type: string }
+
+  /api/{session}/contacts:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+    get:
+      tags: [Read]
+      summary: List known contacts
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Contact" } }
+
+  /api/{session}/chats:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+    get:
+      tags: [Read]
+      summary: List chats (currently aliases contacts)
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Contact" } }
+
+  /api/{session}/groups:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+    get:
+      tags: [Read]
+      summary: List joined groups
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    jid:     { type: string, example: "1234567890-1700000000@g.us" }
+                    name:    { type: string }
+                    topic:   { type: string }
+                    members: { type: integer }
+
+  /api/{session}/webhooks:
+    parameters:
+      - $ref: "#/components/parameters/SessionInPath"
+    get:
+      tags: [Webhooks]
+      summary: List webhooks for a session
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Webhook" } }
+    post:
+      tags: [Webhooks]
+      summary: Register a webhook for a session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:     { type: string, example: "https://your.n8n.host/webhook/wa-in" }
+                secret:  { type: string, description: "HMAC-SHA256 secret", example: "supersecret" }
+                events:
+                  type: array
+                  description: "Empty = all events"
+                  items:
+                    type: string
+                    enum: [message, message.ack, message.reaction, session.status, state.qr, state.pair, state.loggedout]
+                enabled: { type: boolean, default: true }
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Webhook" }
+
+  /api/webhooks/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer }
+    delete:
+      tags: [Webhooks]
+      summary: Delete a webhook
+      responses:
+        "200": { description: ok }
+
+  /api/keys:
+    get:
+      tags: [API keys]
+      summary: List API keys
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/APIKey" } }
+    post:
+      tags: [API keys]
+      summary: Create a new API key (returned once, in plaintext)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, example: "n8n production" }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:      { type: integer }
+                  name:    { type: string }
+                  api_key: { type: string, description: "Shown once, not retrievable later" }
+
+  /api/keys/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer }
+    delete:
+      tags: [API keys]
+      summary: Revoke an API key
+      responses:
+        "200": { description: ok }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+
+  parameters:
+    SessionName:
+      in: path
+      name: name
+      required: true
+      schema: { type: string }
+      example: default
+    SessionInPath:
+      in: path
+      name: session
+      required: true
+      schema: { type: string }
+      example: default
+
+  schemas:
+    Session:
+      type: object
+      properties:
+        name:   { type: string, example: default }
+        jid:    { type: string, example: "6281234567890.0:1@s.whatsapp.net" }
+        status:
+          type: string
+          enum: [STOPPED, STARTING, SCAN_QR, WORKING, FAILED]
+
+    Webhook:
+      type: object
+      properties:
+        id:           { type: integer }
+        session_name: { type: string }
+        url:          { type: string }
+        secret:       { type: string }
+        events:       { type: array, items: { type: string }, nullable: true }
+        enabled:      { type: boolean }
+        created_at:   { type: integer, description: "Unix timestamp" }
+
+    APIKey:
+      type: object
+      properties:
+        id:         { type: integer }
+        name:       { type: string }
+        created_at: { type: integer }
+        last_used:  { type: integer, nullable: true }
+
+    Contact:
+      type: object
+      properties:
+        jid:       { type: string }
+        push_name: { type: string }
+        full_name: { type: string }
+        first:     { type: string }
+        business:  { type: string }
+
+    SendResult:
+      type: object
+      properties:
+        id:        { type: string, example: "3EB0BCD0AABBCCDDEEFF" }
+        timestamp: { type: integer }
+
+    MediaJSON:
+      type: object
+      required: [session, chat_id, url]
+      properties:
+        session:    { type: string, example: default }
+        chat_id:    { type: string, example: "6281234567890" }
+        url:        { type: string, example: "https://example.com/image.jpg" }
+        caption:    { type: string }
+        mimetype:   { type: string, example: "image/jpeg" }
+        filename:   { type: string }
+        expiration:
+          type: integer
+          description: "Disappearing-messages timer (seconds). Omit to auto-inherit; pass -1 to force non-ephemeral."
+
+    MediaMultipart:
+      type: object
+      required: [session, chat_id, file]
+      properties:
+        session:    { type: string }
+        chat_id:    { type: string }
+        file:
+          type: string
+          format: binary
+        caption:    { type: string }
+        mimetype:   { type: string }
+        filename:   { type: string }
+        expiration: { type: integer }
+
+    WebhookEnvelope:
+      type: object
+      description: |
+        Payload posted by the gateway to a registered webhook URL.
+        Signed with `X-Webhook-Signature: sha256=<hex>` when a secret is configured.
+      properties:
+        event:
+          type: string
+          enum: [message, message.ack, message.reaction, session.status, state.qr, state.pair, state.loggedout]
+        session:   { type: string }
+        timestamp: { type: integer }
+        payload:   { type: object, additionalProperties: true }
