@@ -5,7 +5,7 @@
 [![Go Version](https://img.shields.io/badge/go-1.26%2B-00ADD8)](https://go.dev/)
 [![Node](https://img.shields.io/badge/node-22%2B-339933)](https://nodejs.org/)
 
-Self-hosted **WhatsApp HTTP API + Dashboard**, powered by [tulir/whatsmeow](https://github.com/tulir/whatsmeow). A leaner alternative to [WAHA](https://github.com/devlikeapro/waha) / [GOWA](https://github.com/aldinokemal/go-whatsapp-web-multidevice) — single Go binary plus a Next.js dashboard.
+Self-hosted **WhatsApp HTTP API + Dashboard** — single Go binary, Next.js control panel, Docker-ready.
 
 > ⚠️ **Unofficial project.** Not affiliated with WhatsApp / Meta. For commercial workloads consider the official WhatsApp Business API. Use of this software is your responsibility.
 
@@ -171,3 +171,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 [MIT](LICENSE).
+
+## Acknowledgements
+
+This project would not exist without the wider Go ecosystem and a handful of upstream libraries — most notably the work of [@tulir](https://github.com/tulir) on the underlying WhatsApp protocol implementation, distributed under [MPL-2.0](https://www.mozilla.org/en-US/MPL/2.0/). Thanks ❤️
