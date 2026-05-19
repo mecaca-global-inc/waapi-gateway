@@ -1,0 +1,7 @@
+{
+  "build_command": "",
+  "start_command": "",
+  "install_command": "",
+  "framework": "docker",
+  "dockerfile_path": "Dockerfile"
+}
