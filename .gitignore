@@ -19,8 +19,8 @@ coverage.out
 # Node / Next
 node_modules/
 .next/
-dist/
-# Dashboard static export copied at Docker build time
+# Dashboard static export copied at Docker build time (keep placeholder
+# so the go:embed in internal/web/web.go compiles on a fresh clone).
 /internal/web/dist/*
 !/internal/web/dist/.gitkeep
 
