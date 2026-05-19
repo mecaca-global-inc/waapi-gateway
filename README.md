@@ -23,7 +23,23 @@ Self-hosted **WhatsApp HTTP API + Dashboard** — single Go binary, Next.js cont
 - 🗄️ **SQLite default**, Postgres via `DB_URI`
 - 🐳 **Docker / Docker Compose** ready
 
-## Quick start (Docker)
+## Quick start
+
+### Easiest — prebuilt image (no clone, no build)
+
+```bash
+docker run -d --name waapi \
+  -p 3000:3000 \
+  -e ADMIN_PASS=ChangeMeToSomethingStrong!23 \
+  -v waapi_data:/app/storages \
+  ghcr.io/mecaca-global-inc/waapi-gateway:latest
+```
+
+Open <http://localhost:3000>. Login `admin` / your `ADMIN_PASS`. Dashboard, REST API, OpenAPI docs all live on the same URL.
+
+Multi-arch image (linux/amd64 + linux/arm64) auto-published from the `main` branch.
+
+### Docker Compose (clone the repo)
 
 ```bash
 git clone https://github.com/mecaca-global-inc/waapi-gateway
@@ -33,9 +49,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-- Dashboard: <http://localhost:3001>
-- Gateway API: <http://localhost:3000>
-- Swagger UI: <http://localhost:3001/docs> (auth-gated)
+Same URL: <http://localhost:3000>.
 
 ## Deploy guides
 

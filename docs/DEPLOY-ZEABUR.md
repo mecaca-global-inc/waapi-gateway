@@ -1,30 +1,60 @@
-# Deploy to Zeabur
+# Deploy WAAPI Gateway on Zeabur
 
-Single-binary deploy (gateway + embedded dashboard). ~5 min total.
+Self-host in under 5 minutes. No clone, no build, no Dockerfile tweaks.
 
-## Prerequisites
+## TL;DR — One-click install
 
-- GitHub account with the repo pushed
-- [Zeabur](https://zeabur.com) account (sign in with GitHub)
-- A strong `ADMIN_PASS` (not `admin` / `changeme` / `password` / empty)
+1. **Sign in** at [zeabur.com](https://zeabur.com)
+2. **Create Project** → pick the region closest to you
+3. **+ Add Service** → **Docker Image** → paste:
+   ```
+   ghcr.io/mecaca-global-inc/waapi-gateway:latest
+   ```
+4. **Variables** → paste:
+   ```env
+   ADMIN_USER=admin
+   ADMIN_PASS=ChangeMeToSomethingStrong!23
+   CORS_ORIGINS=*
+   LOG_FORMAT=json
+   DEVICE_NAME=WAAPI Gateway
+   ```
+5. **Volumes** → Add → ID `storages`, Mount Directory `/app/storages`
+6. **Networking** → Generate Domain → port `8080`
+7. Open the domain in your browser. Login `admin` / your `ADMIN_PASS`.
 
-## Step 1 — Install the Zeabur GitHub App
+That's it. The container ships gateway + dashboard in one binary.
 
-Open <https://github.com/apps/zeabur/installations/new>. Pick your account/org → grant access to `waapi-gateway` → Install.
+---
 
-## Step 2 — Create project + service
+## Walkthrough (with screenshots)
 
-1. Zeabur dashboard → **Create Project** → pick region (Singapore for SEA)
-2. **+ Add Service** → **GitHub** → select `waapi-gateway` → branch `main`
-3. Zeabur auto-detects the root `Dockerfile`
+### 1 — Sign in
 
-## Step 3 — Environment variables
+Open [zeabur.com](https://zeabur.com) and sign in with GitHub. You don't need to grant access to any repo — we're pulling the prebuilt Docker image, not source.
+
+### 2 — Create a project
+
+**Create Project** → choose region (Singapore for SEA, Frankfurt for EU, etc.).
+
+### 3 — Add the gateway service
+
+**+ Add Service** → **Docker Image**. Paste:
+
+```
+ghcr.io/mecaca-global-inc/waapi-gateway:latest
+```
+
+Hit **Deploy**. Zeabur pulls the image and starts the container.
+
+> **Why this image?** It's a multi-arch (amd64 + arm64) build of the gateway + embedded dashboard, published automatically on every release. Source: <https://github.com/mecaca-global-inc/waapi-gateway>.
+
+### 4 — Environment variables
 
 Service → **Variables** tab → paste:
 
 ```env
 ADMIN_USER=admin
-ADMIN_PASS=YourStrongPassword!23
+ADMIN_PASS=ChangeMeToSomethingStrong!23
 CORS_ORIGINS=*
 LOG_LEVEL=info
 LOG_FORMAT=json
@@ -33,109 +63,110 @@ DB_DIALECT=sqlite3
 DB_URI=file:/app/storages/gateway.db?_foreign_keys=on
 ```
 
-Replace `ADMIN_PASS` with a real secret. **Don't set `PORT`** — Zeabur injects it, the binary reads it automatically.
+**Replace `ADMIN_PASS`** with something only you know. It must not be one of `admin` / `changeme` / `password` / empty — the gateway refuses to boot with weak defaults.
 
-## Step 4 — Persistent volume (critical)
+**Do not set `PORT`** — Zeabur injects it, the binary reads it.
+
+### 5 — Persistent volume (critical)
 
 Service → **Volumes** tab → **Add Volume**:
 
-| Field           | Value             |
-| --------------- | ----------------- |
-| Volume ID       | `storages`        |
-| Mount Directory | `/app/storages`   |
+| Field           | Value           |
+| --------------- | --------------- |
+| Volume ID       | `storages`      |
+| Mount Directory | `/app/storages` |
 
-Without this, WhatsApp pairings reset on every redeploy.
+Without this, every redeploy wipes WhatsApp pairings and you'll have to re-scan the QR each time.
 
-## Step 5 — Public domain
+### 6 — Public domain
 
 Service → **Networking** → **Generate Domain**:
 
-- Subdomain: `waapi` (or anything available)
+- Subdomain: anything available, e.g. `waapi`
 - Port: **8080** (Zeabur's injected `$PORT`)
 - Click **Confirm**
 
-Gives you `https://<subdomain>.zeabur.app`. HTTPS auto-provisioned.
+You'll get `https://<your-subdomain>.zeabur.app` with HTTPS.
 
-## Step 6 — Deploy
-
-Zeabur builds + boots automatically on first save (and every `git push` after). Watch the **Logs** tab. Expect:
-
-```
-INF starting waapi-gateway addr=:3000 db=sqlite3 device="WAAPI Gateway"
-INF http listen listen=:8080
-```
-
-## Step 7 — Verify
+### 7 — Verify
 
 ```bash
 curl https://<your-subdomain>.zeabur.app/healthz
 # → {"ok":true}
 ```
 
-Open `https://<your-subdomain>.zeabur.app` in a browser → login with `admin` / your `ADMIN_PASS` → dashboard renders.
+Open the URL in a browser. Login screen renders. Use `admin` / your `ADMIN_PASS`.
 
-## Step 8 — First WhatsApp pairing
+### 8 — First WhatsApp pairing
 
-1. Dashboard → **Sessions** → enter name e.g. `main` → **Create**
+1. Dashboard → **Sessions** → enter a name e.g. `main` → **Create**
 2. Click the `main` row → **Start**
 3. QR appears → scan with phone (WhatsApp → *Linked Devices* → *Link a Device*)
 4. Status flips `SCAN_QR` → `WORKING`
 
-## Step 9 — Push-to-deploy
+### 9 — Stay updated
 
-Already wired. Any `git push origin main` triggers a Zeabur rebuild. No further setup.
+Zeabur **doesn't auto-pull image updates** by default for Docker Image sources. When a new gateway release ships:
+
+- Service → **Settings** → **Image** → pick a newer tag (e.g. `:1.2.0`) or stay on `:latest`
+- Click **Redeploy**
+
+Or pin a specific version (recommended for production):
+
+```
+ghcr.io/mecaca-global-inc/waapi-gateway:1.1.0
+```
+
+Browse all tags: <https://github.com/mecaca-global-inc/waapi-gateway/pkgs/container/waapi-gateway>
+
+---
 
 ## Optional — Custom domain
 
-Service → **Networking** → **Add Domain** → enter `api.your-domain.com` → Zeabur shows the DNS record → add it at your registrar → HTTPS auto-issued in ~2 min.
+Service → **Networking** → **Add Domain** → enter `api.yourdomain.com` → Zeabur shows a DNS record → add it at your registrar → HTTPS auto-issued in ~2 min.
 
-After the custom domain is live, also tighten CORS:
+After the custom domain is live, tighten CORS:
 
 ```env
-CORS_ORIGINS=https://api.your-domain.com,https://your-domain.com
+CORS_ORIGINS=https://api.yourdomain.com,https://yourdomain.com
 ```
+
+Save → Redeploy.
+
+---
 
 ## Plan / cost
 
-| Tier        | Use case                          | Cost              |
-| ----------- | --------------------------------- | ----------------- |
-| Free/Hobby  | dev, sleeps after inactivity      | $0                |
-| Developer   | always-on (needed for WhatsApp WS)| ~$5/mo per service|
-| + Volume    | 1 GB SQLite + media               | included          |
+| Tier         | Use case                            | Cost                |
+| ------------ | ----------------------------------- | ------------------- |
+| Hobby/Free   | development, sleeps after inactivity | $0                  |
+| Developer    | always-on (required for WhatsApp WS) | ~$5/mo per service  |
+| + Volume     | 1 GB SQLite + media                  | included            |
 
-**Always-on plan required for production** — WhatsApp drops the session if the process sleeps.
+**Always-on plan required for production.** WhatsApp drops the session if the process sleeps.
+
+---
 
 ## Troubleshooting
 
-| Symptom                              | Fix                                                                  |
-| ------------------------------------ | -------------------------------------------------------------------- |
-| 502 from Cloudflare                  | Check **Logs**. Usually weak `ADMIN_PASS` aborting boot.             |
-| QR re-scan demanded after redeploy   | Volume not mounted; redo Step 4.                                     |
-| Dashboard 404 on sub-pages           | Embedded build missing; redeploy from latest `main`.                 |
-| `invalid api key` on dashboard       | localStorage stale — click **Logout** then login again.              |
-| `ADMIN_PASS is weak` in logs         | Replace with a real password (not on the blocklist), save, redeploy. |
-| Container restarting in a loop       | Inspect **Logs** for the first error line — usually env or volume.   |
+| Symptom                              | Fix                                                                                |
+| ------------------------------------ | ---------------------------------------------------------------------------------- |
+| 502 from Cloudflare                  | Check **Logs**. Usually weak `ADMIN_PASS` aborting boot.                           |
+| QR rescan after redeploy             | Volume not mounted — redo Step 5.                                                  |
+| Dashboard 404 on sub-pages           | Old image — pull `:latest` again via Redeploy.                                     |
+| `invalid api key` on dashboard       | localStorage stale — click **Logout** then log in again.                           |
+| `ADMIN_PASS is weak`                 | Pick a password not on the blocklist, save, redeploy.                              |
+| Container restarting in a loop       | **Logs** tab — look at the first error line.                                       |
+| Cannot see the image when typing it  | Type the full string. Public package, no auth needed.                              |
 
-## What gets deployed
+---
 
-- **One container** running `waapi-gateway`
-- Listens on `$PORT` (Zeabur's `8080`)
-- Same origin serves:
-  - `/`           — dashboard (Next.js static export, embedded in the binary)
-  - `/api/*`      — REST API
-  - `/ws`         — WebSocket event stream
-  - `/openapi.yaml` — OpenAPI 3.1 spec
-  - `/healthz`    — liveness probe
-- SQLite at `/app/storages/gateway.db` (persists via the volume)
-- WhatsApp credentials persist in the same `/app/storages` volume
+## For maintainers — alternative: install from Git source
 
-## Updating
+If you want push-to-deploy on your own fork:
 
-```bash
-# locally
-git add -A
-git commit -m "feat: ..."
-git push origin main
-```
+1. **+ Add Service** → **GitHub** → select your fork → branch `main`
+2. Install the Zeabur GitHub App if prompted
+3. Continue from Step 4 above
 
-Zeabur picks up the push, rebuilds, and deploys. Healthcheck protects against bad builds — if `/healthz` doesn't return 200, traffic continues hitting the previous container.
+Every `git push origin main` triggers a rebuild. Slower than the prebuilt image (~2 min per deploy) but lets you customize.
