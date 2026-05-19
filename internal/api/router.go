@@ -13,6 +13,7 @@ import (
 	"github.com/mecaca/waapi-gateway/internal/config"
 	"github.com/mecaca/waapi-gateway/internal/store"
 	"github.com/mecaca/waapi-gateway/internal/wa"
+	"github.com/mecaca/waapi-gateway/internal/web"
 )
 
 type Server struct {
@@ -138,6 +139,9 @@ func (s *Server) routes() {
 		return c.Next()
 	})
 	s.app.Get("/ws", websocket.New(s.handleWS))
+
+	// Embedded dashboard (no-op when built without the dashboard assets).
+	web.Mount(s.app)
 }
 
 func joinOrigins(o []string) string {

@@ -1,5 +1,9 @@
-export const GATEWAY_URL =
-  process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localhost:3000";
+// When the dashboard is embedded into the gateway binary (default), leave
+// GATEWAY_URL empty — requests go to the same origin that served the page.
+// Override only when running the dashboard separately (e.g. local dev where
+// the gateway is on a different port, or hosted on Vercel pointing at a
+// remote gateway).
+export const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "";
 
 const KEY_STORAGE = "wa_gateway_key";
 

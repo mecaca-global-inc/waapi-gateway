@@ -20,6 +20,9 @@ coverage.out
 node_modules/
 .next/
 dist/
+# Dashboard static export copied at Docker build time
+/internal/web/dist/*
+!/internal/web/dist/.gitkeep
 
 # Editor
 .DS_Store

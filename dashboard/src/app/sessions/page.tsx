@@ -74,7 +74,7 @@ export default function SessionsPage() {
             {(data ?? []).map((s) => (
               <tr key={s.name} className="border-t border-zinc-200 dark:border-zinc-800">
                 <td className="px-3 py-2 font-medium">
-                  <Link href={`/sessions/${s.name}`} className="hover:underline">
+                  <Link href={`/sessions/detail?name=${encodeURIComponent(s.name)}`} className="hover:underline">
                     {s.name}
                   </Link>
                 </td>
