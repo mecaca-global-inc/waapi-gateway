@@ -70,9 +70,16 @@ func main() {
 		}
 	}
 
+	// Honour PaaS-injected PORT envs (Heroku, Render, Fly, Railway, xCloud, etc.).
+	addr := cfg.HTTPAddr
+	if p := os.Getenv("PORT"); p != "" {
+		addr = ":" + p
+	}
+	log.Info().Str("listen", addr).Msg("http listen")
+
 	srv := api.NewServer(cfg, repo, mgr)
 	go func() {
-		if err := srv.Listen(cfg.HTTPAddr); err != nil {
+		if err := srv.Listen(addr); err != nil {
 			log.Error().Err(err).Msg("http server stopped")
 			cancel()
 		}
