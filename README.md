@@ -13,7 +13,23 @@
 
 Self-hosted **WhatsApp HTTP API + Dashboard** — single Go binary, Next.js control panel, Docker-ready.
 
-> ⚠️ **Unofficial project.** Not affiliated with WhatsApp / Meta. For commercial workloads consider the official WhatsApp Business API. Use of this software is your responsibility.
+> ## ⚠️ Disclaimer — read before use
+>
+> WAAPI Gateway is an **unofficial, independent, open-source project**. It is
+> **not** affiliated with, endorsed by, or sponsored by WhatsApp LLC or Meta
+> Platforms, Inc. "WhatsApp" is a trademark of its respective owner, used here
+> only to identify the service this software interoperates with.
+>
+> Using an **unofficial client may violate the WhatsApp Terms of Service** and
+> can result in your phone number being **banned**. You — the operator — are
+> solely responsible for compliance with the WhatsApp ToS, anti-spam and
+> data-protection laws, and obtaining consent from message recipients.
+>
+> The software is provided **"AS IS", with no warranty and no liability** (see
+> [LICENSE](LICENSE)). **You use it entirely at your own risk.**
+>
+> Full terms: **[DISCLAIMER.md](DISCLAIMER.md)** · For a supported, compliant
+> integration use the [WhatsApp Business Platform](https://business.whatsapp.com/).
 
 ## Features
 
@@ -220,9 +236,18 @@ See [SECURITY.md](SECURITY.md). Report vulnerabilities to **security@waapi.link*
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Legal
+
+- **[LICENSE](LICENSE)** — MIT. Covers your rights to the WAAPI Gateway code itself.
+- **[DISCLAIMER.md](DISCLAIMER.md)** — unofficial status, trademark notice, no-warranty,
+  limitation of liability, acceptable use. **Read before deploying.**
+- **[NOTICE](NOTICE)** — third-party open-source attributions and licenses.
+- **[SECURITY.md](SECURITY.md)** — vulnerability reporting and hardening guidance.
+
 ## License
 
-[MIT](LICENSE).
+[MIT](LICENSE) for the WAAPI Gateway source. Third-party dependencies remain
+under their own licenses — see [NOTICE](NOTICE).
 
 ## Acknowledgements
 

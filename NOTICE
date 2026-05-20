@@ -1,0 +1,92 @@
+WAAPI Gateway
+Copyright (c) 2026 mecaca
+
+This product is licensed under the MIT License (see LICENSE).
+
+WAAPI Gateway is an unofficial, independent project. It is not affiliated
+with, endorsed by, or sponsored by WhatsApp LLC or Meta Platforms, Inc.
+"WhatsApp" is a trademark of its respective owner and is used here only
+nominatively to identify the interoperating service. See DISCLAIMER.md.
+
+================================================================================
+THIRD-PARTY SOFTWARE
+================================================================================
+
+This product includes third-party open-source software. Each component is the
+property of its respective authors and is distributed under its own license.
+
+--------------------------------------------------------------------------------
+go.mau.fi/whatsmeow            — Mozilla Public License 2.0 (MPL-2.0)
+go.mau.fi/libsignal            — Mozilla Public License 2.0 (MPL-2.0)
+go.mau.fi/util                 — Mozilla Public License 2.0 (MPL-2.0)
+--------------------------------------------------------------------------------
+  WhatsApp protocol implementation by Tulir Asokan and contributors.
+  Source: https://github.com/tulir/whatsmeow
+  Full license text: https://www.mozilla.org/en-US/MPL/2.0/
+
+  MPL-2.0 is a file-level copyleft license. WAAPI Gateway consumes these
+  libraries unmodified as Go module dependencies; no MPL-licensed source
+  files have been altered. If you modify any MPL-2.0 file, you must make
+  that modified file's source available under MPL-2.0.
+
+--------------------------------------------------------------------------------
+The following components are distributed under the MIT License:
+--------------------------------------------------------------------------------
+  github.com/gofiber/fiber/v2
+  github.com/gofiber/contrib/websocket
+  github.com/fasthttp/websocket
+  github.com/valyala/fasthttp
+  github.com/valyala/bytebufferpool
+  github.com/valyala/tcplisten
+  github.com/joho/godotenv
+  github.com/lib/pq
+  github.com/mattn/go-sqlite3
+  github.com/mattn/go-colorable
+  github.com/mattn/go-isatty
+  github.com/mattn/go-runewidth
+  github.com/mdp/qrterminal/v3
+  github.com/pressly/goose/v3
+  github.com/rs/zerolog
+  github.com/klauspost/compress
+  github.com/andybalholm/brotli
+  github.com/tinylib/msgp
+  github.com/philhofer/fwd
+  github.com/savsgio/gotils
+  github.com/sethvargo/go-retry
+  github.com/elliotchance/orderedmap/v3
+  github.com/mfridman/interpolate
+  github.com/petermattis/goid
+  next (Next.js), react, react-dom, tailwindcss, swr, clsx, qrcode.react
+
+--------------------------------------------------------------------------------
+The following components are distributed under the BSD-3-Clause License:
+--------------------------------------------------------------------------------
+  github.com/google/uuid
+  google.golang.org/protobuf
+  golang.org/x/crypto, golang.org/x/net, golang.org/x/sys,
+  golang.org/x/text, golang.org/x/sync, golang.org/x/term, golang.org/x/exp
+  github.com/coder/websocket
+  github.com/rivo/uniseg
+
+--------------------------------------------------------------------------------
+Other:
+--------------------------------------------------------------------------------
+  github.com/skip2/go-qrcode      — MIT License
+  filippo.io/edwards25519         — BSD-3-Clause
+  github.com/beeper/argo-go       — see upstream repository
+  github.com/vektah/gqlparser/v2  — MIT License
+  go.uber.org/multierr            — MIT License
+  rsc.io/qr                       — BSD-3-Clause
+
+================================================================================
+
+This NOTICE file is provided for attribution. It is generated from the module
+dependency graph and is best-effort; consult each upstream repository for the
+authoritative license text. To regenerate the dependency list, run:
+
+    go list -m all
+    cd dashboard && npm ls --all
+
+For the complete, authoritative license text of every dependency, inspect the
+module cache (`go mod download` then browse $GOPATH/pkg/mod) or each project's
+repository.
