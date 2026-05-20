@@ -25,12 +25,15 @@ RUN go build -trimpath -ldflags="-s -w" -o /out/waapi-gateway ./cmd/server
 
 # ---- Runtime ----
 FROM alpine:3.20
-RUN apk add --no-cache ca-certificates tzdata sqlite-libs ffmpeg \
+RUN apk add --no-cache ca-certificates tzdata sqlite-libs ffmpeg su-exec \
     && adduser -D -u 10001 gateway
 WORKDIR /app
 COPY --from=gobuild /out/waapi-gateway /app/waapi-gateway
-USER gateway
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 EXPOSE 3000
 VOLUME ["/app/storages"]
 ENV HTTP_ADDR=:3000 DB_DIALECT=sqlite3 DB_URI=file:/app/storages/gateway.db?_foreign_keys=on
-ENTRYPOINT ["/app/waapi-gateway"]
+# Entrypoint starts as root only to fix volume ownership, then drops to the
+# unprivileged "gateway" user via su-exec before running the binary.
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
