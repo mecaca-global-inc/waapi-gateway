@@ -1,9 +1,15 @@
-# WAAPI Gateway
+<p align="center">
+  <img src="docs/banner.png" alt="WAAPI Gateway — self-hosted WhatsApp HTTP API" width="100%">
+</p>
 
-[![CI](https://github.com/mecaca-global-inc/waapi-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/mecaca-global-inc/waapi-gateway/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Go Version](https://img.shields.io/badge/go-1.26%2B-00ADD8)](https://go.dev/)
-[![Node](https://img.shields.io/badge/node-22%2B-339933)](https://nodejs.org/)
+<p align="center">
+  <a href="https://github.com/mecaca-global-inc/waapi-gateway/actions/workflows/ci.yml"><img src="https://github.com/mecaca-global-inc/waapi-gateway/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://go.dev/"><img src="https://img.shields.io/badge/go-1.26%2B-00ADD8" alt="Go Version"></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-22%2B-339933" alt="Node"></a>
+</p>
+
+# WAAPI Gateway
 
 Self-hosted **WhatsApp HTTP API + Dashboard** — single Go binary, Next.js control panel, Docker-ready.
 
