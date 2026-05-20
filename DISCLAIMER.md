@@ -114,3 +114,5 @@ obtain the Software governs your use of that copy.
 If any provision of this disclaimer is held unenforceable, the remaining
 provisions remain in full force. This disclaimer supplements — and does not
 replace — the [MIT LICENSE](LICENSE).
+
+WAAPI Gateway is published by Mecaca Global Inc. © 2026 Mecaca Global Inc.
