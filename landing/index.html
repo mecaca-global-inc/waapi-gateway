@@ -122,7 +122,7 @@
       <div class="flex flex-wrap items-center gap-2 text-xs text-muted">
         <span class="inline-flex items-center gap-2 px-2 py-1 rounded border border-line bg-surface/80">
           <span class="w-2 h-2 rounded-full bg-neon animate-pulse"></span>
-          v1.1 — live
+          <span data-latest-version>latest</span> — live
         </span>
         <span class="px-2 py-1 rounded border border-line bg-surface/80">single binary</span>
         <span class="px-2 py-1 rounded border border-line bg-surface/80">Docker · multi-arch</span>
@@ -439,7 +439,7 @@
       </a>
       <a href="https://github.com/mecaca-global-inc/waapi-gateway/releases/latest" target="_blank" rel="noopener"
          class="inline-flex items-center gap-2 px-6 py-3 rounded-md border border-line hover:border-neon text-fg transition">
-        Download v1.0.0 ↗
+        Download <span data-latest-version>latest</span> ↗
       </a>
     </div>
   </div>
@@ -461,6 +461,26 @@
     Built on the shoulders of giants — see the <a href="https://github.com/mecaca-global-inc/waapi-gateway/blob/main/README.md#acknowledgements" class="underline hover:text-fg" target="_blank" rel="noopener">acknowledgements</a> for the libraries that made this possible.
   </div>
 </footer>
+
+<script>
+  // Keep the landing page version in sync with GitHub Releases automatically.
+  // Every element with [data-latest-version] is filled with the latest tag,
+  // so a new release never requires editing this page.
+  (function () {
+    var els = document.querySelectorAll('[data-latest-version]');
+    if (!els.length) return;
+    fetch('https://api.github.com/repos/mecaca-global-inc/waapi-gateway/releases/latest', {
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        var tag = data && data.tag_name;
+        if (!tag) return; // leave fallback text ("latest") on failure
+        els.forEach(function (el) { el.textContent = tag; });
+      })
+      .catch(function () { /* offline / rate-limited — fallback text stays */ });
+  })();
+</script>
 
 </body>
 </html>
