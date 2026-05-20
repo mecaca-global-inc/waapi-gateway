@@ -122,9 +122,9 @@
       <div class="flex flex-wrap items-center gap-2 text-xs text-muted">
         <span class="inline-flex items-center gap-2 px-2 py-1 rounded border border-line bg-surface/80">
           <span class="w-2 h-2 rounded-full bg-neon animate-pulse"></span>
-          v1.0.0 — live
+          v1.1 — live
         </span>
-        <span class="px-2 py-1 rounded border border-line bg-surface/80">Go 1.26 · Next.js 16</span>
+        <span class="px-2 py-1 rounded border border-line bg-surface/80">single binary</span>
         <span class="px-2 py-1 rounded border border-line bg-surface/80">Docker · multi-arch</span>
         <span class="px-2 py-1 rounded border border-line bg-surface/80">MIT</span>
       </div>
@@ -182,10 +182,11 @@
           <div class="text-xs text-muted">~/waapi-gateway</div>
           <div class="text-xs text-neon">● live</div>
         </div>
-        <pre class="text-sm leading-relaxed p-5 overflow-x-auto"><span class="hl-cmt"># 1. clone + run</span>
-<span class="hl-cmd">$</span> git clone https://github.com/mecaca-global-inc/waapi-gateway
-<span class="hl-cmd">$</span> cd waapi-gateway && cp .env.example .env
-<span class="hl-cmd">$</span> docker compose up -d --build
+        <pre class="text-sm leading-relaxed p-5 overflow-x-auto"><span class="hl-cmt"># 1. run it — one prebuilt image, gateway + dashboard</span>
+<span class="hl-cmd">$</span> docker run -d -p 3000:3000 \
+    -e ADMIN_PASS=<span class="hl-key">strong-pass</span> \
+    -v waapi_data:/app/storages \
+    ghcr.io/mecaca-global-inc/waapi-gateway:latest
 
 <span class="hl-cmt"># 2. login → get an API key</span>
 <span class="hl-cmd">$</span> curl -sX POST http://localhost:3000/api/login \
@@ -197,7 +198,7 @@
 <span class="hl-cmd">$</span> curl -sX POST http://localhost:3000/api/sendText \
     -H <span class="hl-str">"Authorization: Bearer $KEY"</span> \
     -H <span class="hl-str">'Content-Type: application/json'</span> \
-    -d <span class="hl-str">'{"session":"default","chat_id":"6281234567890","text":"hello 👋"}'</span>
+    -d <span class="hl-str">'{"session":"main","chat_id":"6281234567890","text":"hello 👋"}'</span>
 {"id":"<span class="hl-num">3EB0...</span>","timestamp":<span class="hl-num">1747100000</span>}<span class="text-neon animate-blink">▍</span></pre>
       </div>
     </div>
@@ -239,16 +240,28 @@
         <p class="text-fg/80 text-sm">WebSocket <code>/ws</code> pushes events to the dashboard in realtime.</p>
       </div>
       <div class="card p-5 rounded-lg border border-line hover:border-neon transition">
-        <div class="text-neon mb-2">[07] dashboard</div>
-        <p class="text-fg/80 text-sm">Next.js 16 + Tailwind v4. Send playground, webhooks UI, embedded Swagger.</p>
+        <div class="text-neon mb-2">[07] group admin</div>
+        <p class="text-fg/80 text-sm">Create groups, add/remove/promote members, rename, lock, invite links — full REST surface.</p>
       </div>
       <div class="card p-5 rounded-lg border border-line hover:border-neon transition">
-        <div class="text-neon mb-2">[08] sqlite / postgres</div>
+        <div class="text-neon mb-2">[08] embedded dashboard</div>
+        <p class="text-fg/80 text-sm">Next.js UI baked into the binary. One URL: send playground, webhooks, embedded Swagger.</p>
+      </div>
+      <div class="card p-5 rounded-lg border border-line hover:border-neon transition">
+        <div class="text-neon mb-2">[09] sqlite / postgres</div>
         <p class="text-fg/80 text-sm">SQLite by default. Drop a postgres URL into <code>DB_URI</code> for prod.</p>
       </div>
       <div class="card p-5 rounded-lg border border-line hover:border-neon transition">
-        <div class="text-neon mb-2">[09] your brand</div>
-        <p class="text-fg/80 text-sm">Set <code>DEVICE_NAME</code> — Linked Devices shows your label, not "whatsmeow".</p>
+        <div class="text-neon mb-2">[10] one binary</div>
+        <p class="text-fg/80 text-sm">Gateway + dashboard in a single 60 MB image. <code>docker run</code> and you're live.</p>
+      </div>
+      <div class="card p-5 rounded-lg border border-line hover:border-neon transition">
+        <div class="text-neon mb-2">[11] your brand</div>
+        <p class="text-fg/80 text-sm">Set <code>DEVICE_NAME</code> — the WhatsApp Linked Devices screen shows your label.</p>
+      </div>
+      <div class="card p-5 rounded-lg border border-line hover:border-neon transition">
+        <div class="text-neon mb-2">[12] secure by default</div>
+        <p class="text-fg/80 text-sm">Weak-password boot guard, login rate-limit, hashed API keys, constant-time compares.</p>
       </div>
     </div>
   </div>
@@ -259,18 +272,18 @@
   <div class="max-w-6xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-start">
     <div>
       <h2 class="text-2xl md:text-3xl font-bold"><span class="text-muted">//</span> 60-second deploy</h2>
-      <p class="text-fg/80 mt-3 mb-6">Docker is the path of least resistance. Compose brings up the gateway and the dashboard side by side.</p>
+      <p class="text-fg/80 mt-3 mb-6">One prebuilt image. Gateway and dashboard in the same container — no separate frontend to host, no CORS to wrangle.</p>
       <ul class="space-y-3 text-sm">
-        <li class="flex gap-3"><span class="text-neon">▸</span><span class="text-fg/80"><b class="text-fg">Clone</b> the repo and copy <code>.env.example</code>.</span></li>
+        <li class="flex gap-3"><span class="text-neon">▸</span><span class="text-fg/80"><b class="text-fg">Pull</b> <code>ghcr.io/mecaca-global-inc/waapi-gateway</code> — multi-arch, amd64 + arm64.</span></li>
         <li class="flex gap-3"><span class="text-neon">▸</span><span class="text-fg/80"><b class="text-fg">Set</b> a strong <code>ADMIN_PASS</code> — boot refuses weak defaults.</span></li>
-        <li class="flex gap-3"><span class="text-neon">▸</span><span class="text-fg/80"><b class="text-fg">Run</b> <code>docker compose up -d --build</code>.</span></li>
+        <li class="flex gap-3"><span class="text-neon">▸</span><span class="text-fg/80"><b class="text-fg">Mount</b> a volume on <code>/app/storages</code> so sessions survive restarts.</span></li>
         <li class="flex gap-3"><span class="text-neon">▸</span><span class="text-fg/80"><b class="text-fg">Open</b> the dashboard, scan the QR.</span></li>
         <li class="flex gap-3"><span class="text-neon">▸</span><span class="text-fg/80"><b class="text-fg">Send</b> your first message.</span></li>
       </ul>
       <div class="mt-6 flex gap-3">
-        <a href="https://github.com/mecaca-global-inc/waapi-gateway#quick-start-docker" target="_blank" rel="noopener"
+        <a href="https://github.com/mecaca-global-inc/waapi-gateway/blob/main/docs/DEPLOY-ZEABUR.md" target="_blank" rel="noopener"
            class="inline-flex items-center gap-2 rounded-md bg-neon text-ink hover:bg-white px-4 py-2 text-sm font-bold transition">
-          Full docs ↗
+          Deploy guide ↗
         </a>
         <a href="https://github.com/mecaca-global-inc/waapi-gateway/releases/latest" target="_blank" rel="noopener"
            class="inline-flex items-center gap-2 rounded-md border border-line hover:border-neon px-4 py-2 text-sm text-fg transition">
@@ -281,21 +294,21 @@
 
     <div class="card relative rounded-xl border border-line overflow-hidden">
       <div class="flex items-center justify-between px-4 py-2 border-b border-line bg-black/40">
-        <div class="text-xs text-muted">docker-compose.yml</div>
-        <div class="text-xs text-neon2">yaml</div>
+        <div class="text-xs text-muted">deploy anywhere</div>
+        <div class="text-xs text-neon2">docker</div>
       </div>
-<pre class="text-sm leading-relaxed p-5 overflow-x-auto"><span class="hl-key">services:</span>
-  <span class="hl-key">gateway:</span>
-    <span class="hl-key">image:</span> waapi-gateway:latest
-    <span class="hl-key">ports:</span> [<span class="hl-str">"3000:3000"</span>]
-    <span class="hl-key">env_file:</span> .env
-    <span class="hl-key">volumes:</span>
-      - gateway_data:/app/storages
-  <span class="hl-key">dashboard:</span>
-    <span class="hl-key">image:</span> waapi-gateway-dashboard:latest
-    <span class="hl-key">ports:</span> [<span class="hl-str">"3001:3001"</span>]
-    <span class="hl-key">environment:</span>
-      <span class="hl-key">NEXT_PUBLIC_GATEWAY_URL:</span> http://localhost:3000</pre>
+<pre class="text-sm leading-relaxed p-5 overflow-x-auto"><span class="hl-cmt"># bare docker</span>
+<span class="hl-cmd">$</span> docker run -d -p 3000:3000 \
+    -e ADMIN_PASS=<span class="hl-key">strong-pass</span> \
+    -v waapi_data:/app/storages \
+    ghcr.io/mecaca-global-inc/waapi-gateway:latest
+
+<span class="hl-cmt"># or any container PaaS — Zeabur, Railway,</span>
+<span class="hl-cmt"># Render, Fly, Coolify: add the image as a</span>
+<span class="hl-cmt"># service, set ADMIN_PASS, mount a volume.</span>
+
+<span class="hl-cmt"># dashboard + API + docs all on one URL:</span>
+<span class="hl-str">http://localhost:3000</span></pre>
     </div>
   </div>
 </section>
