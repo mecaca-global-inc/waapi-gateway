@@ -44,6 +44,7 @@ Self-hosted **WhatsApp HTTP API + Dashboard** — single Go binary, Next.js cont
 - 🎨 **Next.js 16 dashboard** — sessions, send playground, webhooks, API keys, embedded Swagger UI
 - 🗄️ **SQLite default**, Postgres via `DB_URI`
 - 🐳 **Docker / Docker Compose** ready
+- 🤖 **MCP server built in** — `waapi-gateway mcp` exposes 45+ tools to Claude Desktop, Cursor, OpenCode, Codex, n8n (see [docs/DEPLOY-MCP.md](docs/DEPLOY-MCP.md))
 
 ## Quick start
 
@@ -78,6 +79,7 @@ Same URL: <http://localhost:3000>.
 Step-by-step instructions for specific platforms:
 
 - [Zeabur](docs/DEPLOY-ZEABUR.md) — single-binary, recommended for individuals + small teams
+- [MCP server](docs/DEPLOY-MCP.md) — connect Claude Desktop / Cursor / OpenCode / n8n via Model Context Protocol
 
 ## Deploy to a container PaaS (Railway / Render / Fly / xCloud / Coolify)
 

@@ -12,6 +12,7 @@ import (
 
 	"github.com/mecaca/waapi-gateway/internal/api"
 	"github.com/mecaca/waapi-gateway/internal/config"
+	mcpserver "github.com/mecaca/waapi-gateway/internal/mcp"
 	"github.com/mecaca/waapi-gateway/internal/observability"
 	"github.com/mecaca/waapi-gateway/internal/store"
 	"github.com/mecaca/waapi-gateway/internal/wa"
@@ -28,6 +29,14 @@ var deviceName = func() string {
 }()
 
 func main() {
+	// Subcommand dispatch (kept stdlib-simple — only one subcommand today).
+	if len(os.Args) > 1 && os.Args[1] == "mcp" {
+		if err := mcpserver.Run(os.Args[2:]); err != nil {
+			log.Fatal().Err(err).Msg("mcp server")
+		}
+		return
+	}
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal().Err(err).Msg("load config")
