@@ -65,7 +65,7 @@ DB_URI=file:/app/storages/gateway.db?_foreign_keys=on
 
 **Replace `ADMIN_PASS`** with something only you know. It must not be one of `admin` / `changeme` / `password` / empty — the gateway refuses to boot with weak defaults.
 
-**Do not set `PORT`** — Zeabur injects it, the binary reads it.
+**You don't need to set `PORT`** — the image defaults to `:8080`, which Zeabur expects out of the box. (The binary still honours `PORT` and `HTTP_ADDR` if you want to override.)
 
 ### 5 — Persistent volume (critical)
 

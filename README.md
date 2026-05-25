@@ -52,7 +52,7 @@ Self-hosted **WhatsApp HTTP API + Dashboard** — single Go binary, Next.js cont
 
 ```bash
 docker run -d --name waapi \
-  -p 3000:3000 \
+  -p 3000:8080 \
   -e ADMIN_PASS=ChangeMeToSomethingStrong!23 \
   -v waapi_data:/app/storages \
   ghcr.io/mecaca-global-inc/waapi-gateway:latest

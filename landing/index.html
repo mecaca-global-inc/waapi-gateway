@@ -218,7 +218,7 @@
           <div class="text-xs text-neon">● live</div>
         </div>
         <pre class="text-sm leading-relaxed p-5 overflow-x-auto"><span class="hl-cmt"># 1. run it — one prebuilt image, gateway + dashboard</span>
-<span class="hl-cmd">$</span> docker run -d -p 3000:3000 \
+<span class="hl-cmd">$</span> docker run -d -p 3000:8080 \
     -e ADMIN_PASS=<span class="hl-key">strong-pass</span> \
     -v waapi_data:/app/storages \
     ghcr.io/mecaca-global-inc/waapi-gateway:latest
@@ -333,7 +333,7 @@
         <div class="text-xs text-neon2">docker</div>
       </div>
 <pre class="text-sm leading-relaxed p-5 overflow-x-auto"><span class="hl-cmt"># bare docker</span>
-<span class="hl-cmd">$</span> docker run -d -p 3000:3000 \
+<span class="hl-cmd">$</span> docker run -d -p 3000:8080 \
     -e ADMIN_PASS=<span class="hl-key">strong-pass</span> \
     -v waapi_data:/app/storages \
     ghcr.io/mecaca-global-inc/waapi-gateway:latest

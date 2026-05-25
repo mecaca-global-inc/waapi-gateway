@@ -31,9 +31,11 @@ WORKDIR /app
 COPY --from=gobuild /out/waapi-gateway /app/waapi-gateway
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh
-EXPOSE 3000
+EXPOSE 8080
 VOLUME ["/app/storages"]
-ENV HTTP_ADDR=:3000 DB_DIALECT=sqlite3 DB_URI=file:/app/storages/gateway.db?_foreign_keys=on
+# Default to :8080 — matches Zeabur/Railway/Render/Fly/Cloud Run conventions.
+# Override with HTTP_ADDR (or $PORT, which the binary also reads) for other setups.
+ENV HTTP_ADDR=:8080 DB_DIALECT=sqlite3 DB_URI=file:/app/storages/gateway.db?_foreign_keys=on
 # Entrypoint starts as root only to fix volume ownership, then drops to the
 # unprivileged "gateway" user via su-exec before running the binary.
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
