@@ -10,7 +10,7 @@ The MCP server is an adapter: it forwards every tool invocation to the gateway's
 
 ```bash
 # replace with your gateway URL + admin password
-curl -X POST https://waapi.zeabur.app/api/login \
+curl -X POST https://your-gateway.example.com/api/login \
   -H 'Content-Type: application/json' \
   -d '{"username":"admin","password":"<your password>"}'
 # → {"api_key":"8604c43f-d6b3-4305-b77f-..."}
@@ -30,7 +30,7 @@ Two ways to launch:
 
 #### A) Direct binary (you've downloaded the gateway)
 ```bash
-WAAPI_GATEWAY_URL=https://waapi.zeabur.app \
+WAAPI_GATEWAY_URL=https://your-gateway.example.com \
 WAAPI_API_KEY=... \
 waapi-gateway mcp
 ```
@@ -38,7 +38,7 @@ waapi-gateway mcp
 #### B) Docker (one-shot subprocess — no local install)
 ```bash
 docker run -i --rm \
-  -e WAAPI_GATEWAY_URL=https://waapi.zeabur.app \
+  -e WAAPI_GATEWAY_URL=https://your-gateway.example.com \
   -e WAAPI_API_KEY=... \
   ghcr.io/mecaca-global-inc/waapi-gateway:latest mcp
 ```
@@ -48,7 +48,7 @@ docker run -i --rm \
 Expose the MCP server on a port so cloud agents can connect over HTTPS:
 
 ```bash
-WAAPI_GATEWAY_URL=https://waapi.zeabur.app \
+WAAPI_GATEWAY_URL=https://your-gateway.example.com \
 WAAPI_API_KEY=... \
 MCP_BEARER_TOKEN=... \
 waapi-gateway mcp --http :3001
@@ -74,7 +74,7 @@ File: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) 
       "command": "docker",
       "args": [
         "run", "-i", "--rm",
-        "-e", "WAAPI_GATEWAY_URL=https://waapi.zeabur.app",
+        "-e", "WAAPI_GATEWAY_URL=https://your-gateway.example.com",
         "-e", "WAAPI_API_KEY=YOUR_API_KEY",
         "ghcr.io/mecaca-global-inc/waapi-gateway:latest", "mcp"
       ]
