@@ -13,8 +13,8 @@ jobs:
     name: Go build & test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: "1.26"
           cache: true
@@ -29,8 +29,8 @@ jobs:
       run:
         working-directory: dashboard
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: npm
@@ -39,26 +39,7 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run build
 
-  docker:
-    name: Docker image (multi-arch)
-    runs-on: ubuntu-latest
-    needs: [go, dashboard]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-      - name: Build gateway image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: false
-          tags: waapi-gateway:ci
-      - name: Build dashboard image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./dashboard
-          platforms: linux/amd64,linux/arm64
-          push: false
-          tags: waapi-gateway-dashboard:ci
+# Image building lives in release.yml (Publish image) — it builds the
+# multi-arch image once, with layer caching, and pushes to GHCR. CI used to
+# duplicate that here without a push, which compiled arm64 CGO under QEMU
+# emulation and routinely hit the 6h job timeout. Removed.
