@@ -11,7 +11,8 @@ info:
     (`/api/{session}/...`) or as the `session` field in JSON bodies of send-message calls.
 
     **chat_id** accepts either a bare E.164 phone number (`6281234567890`) or a full JID
-    (`6281234567890@s.whatsapp.net` for personal, `1234567890-1700000000@g.us` for groups).
+    (`6281234567890@s.whatsapp.net` for personal, `1234567890-1700000000@g.us` for groups,
+    `112537404182586@lid` for phone-number-less / LID-addressed contacts).
 servers:
   - url: http://localhost:3000
     description: Local

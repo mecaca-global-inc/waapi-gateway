@@ -13,16 +13,22 @@ func MessagePayload(e *events.Message) map[string]any {
 			body = e.Message.ExtendedTextMessage.GetText()
 		}
 	}
-	return map[string]any{
-		"id":         e.Info.ID,
-		"chat":       e.Info.Chat.String(),
-		"sender":     e.Info.Sender.String(),
-		"from_me":    e.Info.IsFromMe,
-		"timestamp":  e.Info.Timestamp.Unix(),
-		"push_name":  e.Info.PushName,
-		"body":       body,
-		"has_media":  hasMedia(e),
+	payload := map[string]any{
+		"id":              e.Info.ID,
+		"chat":            e.Info.Chat.String(),
+		"sender":          e.Info.Sender.String(),
+		"addressing_mode": string(e.Info.AddressingMode),
+		"from_me":         e.Info.IsFromMe,
+		"timestamp":       e.Info.Timestamp.Unix(),
+		"push_name":       e.Info.PushName,
+		"body":            body,
+		"has_media":       hasMedia(e),
 	}
+	// sender_alt carries the phone-number JID when the sender is LID-addressed (and vice versa).
+	if !e.Info.SenderAlt.IsEmpty() {
+		payload["sender_alt"] = e.Info.SenderAlt.String()
+	}
+	return payload
 }
 
 func hasMedia(e *events.Message) bool {
@@ -37,11 +43,16 @@ func hasMedia(e *events.Message) bool {
 }
 
 func ReceiptPayload(e *events.Receipt) map[string]any {
-	return map[string]any{
-		"chat":        e.Chat.String(),
-		"sender":      e.Sender.String(),
-		"type":        string(e.Type),
-		"message_ids": e.MessageIDs,
-		"timestamp":   e.Timestamp.Unix(),
+	payload := map[string]any{
+		"chat":            e.Chat.String(),
+		"sender":          e.Sender.String(),
+		"addressing_mode": string(e.AddressingMode),
+		"type":            string(e.Type),
+		"message_ids":     e.MessageIDs,
+		"timestamp":       e.Timestamp.Unix(),
 	}
+	if !e.SenderAlt.IsEmpty() {
+		payload["sender_alt"] = e.SenderAlt.String()
+	}
+	return payload
 }
