@@ -16,6 +16,9 @@ import (
 	"github.com/mecaca/waapi-gateway/internal/web"
 )
 
+// Version is stamped at build time via -ldflags "-X .../internal/api.Version=<sha>".
+var Version = "dev"
+
 type Server struct {
 	app  *fiber.App
 	cfg  *config.Config
@@ -49,7 +52,7 @@ func (s *Server) Listen(addr string) error { return s.app.Listen(addr) }
 func (s *Server) Shutdown() error { return s.app.Shutdown() }
 
 func (s *Server) routes() {
-	s.app.Get("/healthz", func(c *fiber.Ctx) error { return c.JSON(fiber.Map{"ok": true}) })
+	s.app.Get("/healthz", func(c *fiber.Ctx) error { return c.JSON(fiber.Map{"ok": true, "version": Version}) })
 	s.app.Get("/readyz", func(c *fiber.Ctx) error { return c.JSON(fiber.Map{"ok": true}) })
 
 	// OpenAPI spec + Swagger UI

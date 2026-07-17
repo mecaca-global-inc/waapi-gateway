@@ -20,8 +20,9 @@ COPY . .
 # Pull the dashboard static export into the embed slot before `go build` runs.
 RUN rm -rf internal/web/dist && mkdir -p internal/web/dist
 COPY --from=webbuild /web/out/ /src/internal/web/dist/
+ARG GIT_SHA=dev
 ENV CGO_ENABLED=1
-RUN go build -trimpath -ldflags="-s -w" -o /out/waapi-gateway ./cmd/server
+RUN go build -trimpath -ldflags="-s -w -X github.com/mecaca/waapi-gateway/internal/api.Version=${GIT_SHA}" -o /out/waapi-gateway ./cmd/server
 
 # ---- Runtime ----
 FROM alpine:3.20

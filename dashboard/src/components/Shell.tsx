@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { clearKey, getKey } from "@/lib/api";
 
 const nav = [
@@ -15,9 +15,16 @@ const nav = [
 export default function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
+  const [version, setVersion] = useState("");
   useEffect(() => {
     if (!getKey()) router.replace("/login");
   }, [router]);
+  useEffect(() => {
+    fetch("/healthz")
+      .then((r) => r.json())
+      .then((d) => setVersion(d.version ?? ""))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="flex min-h-screen">
@@ -47,6 +54,14 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         >
           Logout
         </button>
+        {version && (
+          <div
+            className="mt-4 text-xs text-zinc-400 dark:text-zinc-600 font-mono"
+            title={version}
+          >
+            {version.slice(0, 7)}
+          </div>
+        )}
       </aside>
       <main className="flex-1 p-8">{children}</main>
     </div>
